@@ -9,11 +9,9 @@ const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process
 const app = express();
 app.use(cors());
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect('mongod://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false
 });
 
 app.use(bodyParser.json());
