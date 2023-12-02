@@ -9,7 +9,7 @@ const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process
 const app = express();
 app.use(cors());
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect('mongod://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
@@ -20,12 +20,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '1701459880645',
-  };
-  next();
-});
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
