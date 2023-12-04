@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const usersRouter = require('./routes/users');
 
 const app = express();
 const port = 3000;
@@ -18,8 +17,8 @@ db.once('open', () => {
 });
 
 app.use(bodyParser.json());
-
-app.use('/api', usersRouter);
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
