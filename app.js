@@ -1,27 +1,31 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const helmet = require('helmet');
-const { login, createUser } = require('./controllers/users');
+const http2 = require('http2');
+const routes = require('./routess');
 
-const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const app = express();
 
-mongoose.connect(DB_URL).then(() => {
-  console.log('MongoDB is connected');
+app.use(express.json());
+
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
+
+mongoose.connect(DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 
-app.use(bodyParser.json());
+app.use((req, res, next) => {
+  req.user = {
+    _id: '656f53bf3cbcda266185890f',
+  };
 
-app.post('/signin', login);
-app.post('/signup', createUser);
-
-app.use(helmet());
-
-app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Неверный путь' });
+  next();
 });
 
-app.listen(PORT, () => {
-  console.log('Server is connected');
+app.use(routes);
+
+app.use('*', (req, res) => {
+  res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({ message: 'Неверный путь' });
 });
+
+app.listen(PORT);
