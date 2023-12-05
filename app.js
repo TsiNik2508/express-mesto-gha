@@ -1,12 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { DB_URL } = require('./config');
 
 const app = express();
 const port = 3000;
 
-mongoose.connect(DB_URL, { useUnifiedTopology: true })
+const dbURI = process.env.DB_URL || 'mongodb://localhost:27017/mestodb';
+
+mongoose.connect(dbURI, { useUnifiedTopology: true })
   .then(() => {
     console.log('MongoDB is connected');
   })
