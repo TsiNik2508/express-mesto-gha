@@ -40,17 +40,14 @@ app.listen(port, () => {
   console.log(`Сервер запущен на http://localhost:${port}`);
 });
 
-app.use((req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  error.message = 'Endpoint not found';
-  next(error);
-});
-
-app.use((req, res, next) => {
+app.use((req, res) => {
   const error = new Error('Not Found');
   error.status = 404;
   error.message = 'Endpoint not found';
 
   res.status(http2.constants.HTTP_STATUS_NOT_FOUND).json({ message: 'Неверный путь' });
+});
+
+app.use((err, req, res) => {
+  res.status(err.status || 500).json({ error: err.message });
 });
