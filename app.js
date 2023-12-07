@@ -28,16 +28,6 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use((req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
-});
-
-app.use((err, req, res, next) => {
-  res.status(err.status || 500).json({ error: { message: err.message } });
-});
-
 const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -47,4 +37,15 @@ db.once('open', () => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+});
+
+app.use((req, res, next) => {
+  const error = new Error('Not Found');
+  error.status = 404;
+  error.message = 'Endpoint not found';
+  next(error);
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: { message: err.message } });
 });
