@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const http2 = require('http2');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -46,6 +47,6 @@ app.use((req, res, next) => {
   next(error);
 });
 
-app.use((err, req, res, next) => {
-  res.status(err.status || 500).json({ error: { message: err.message } });
+app.use('*', (req, res) => {
+  res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({ message: 'Неверный путь' });
 });
