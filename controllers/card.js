@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const HTTP_STATUS_CODE = require('../constans/constants');
+const HTTP_STATUS_CODE = require('../constants/constants');
 
 const getAllCards = (req, res) => {
   Card.find({})
@@ -16,6 +16,7 @@ const getAllCards = (req, res) => {
 const createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
+
   Card.create({ name, link, owner })
     .then((card) => {
       res.status(HTTP_STATUS_CODE.CREATED).send({ data: card });
@@ -90,7 +91,8 @@ const dislikeCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+  const { cardId } = req.params;
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         res
@@ -98,13 +100,27 @@ const deleteCard = (req, res) => {
           .send({ message: 'Запрашиваемая карточка не найдена' });
         return;
       }
-      res.status(HTTP_STATUS_CODE.OK).send({ data: card });
+      if (card.owner.toString() !== req.user._id) {
+        res
+          .status(HTTP_STATUS_CODE.FORBIDDEN)
+          .send({ message: 'Недостаточно прав для удаления карточки' });
+        return;
+      }
+      Card.findByIdAndRemove(cardId)
+        .then(() => {
+          res.status(HTTP_STATUS_CODE.OK).send({ data: card });
+        })
+        .catch((err) => {
+          res
+            .status(HTTP_STATUS_CODE.SERVER_ERROR)
+            .send({ message: 'На сервере произошла ошибка' });
+        });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         res
           .status(HTTP_STATUS_CODE.BAD_REQUEST)
-          .send({ message: err.message });
+          .send({ message: 'Некорректный формат идентификатора карточки' });
         return;
       }
       res

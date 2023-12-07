@@ -1,6 +1,10 @@
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const http2 = require('http2');
+const authMiddleware = require('./middlewares/auth');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,16 +21,10 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   });
 
 app.use(express.json());
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '656f53bf3cbcda266185890f',
-  };
-
-  next();
-});
-
+app.use('/users', authMiddleware);
 app.use('/users', require('./routes/users'));
+
+app.use('/cards', authMiddleware);
 app.use('/cards', require('./routes/cards'));
 
 const db = mongoose.connection;
@@ -42,12 +40,10 @@ app.listen(port, () => {
 
 app.use((req, res) => {
   const error = new Error('Not Found');
-  error.status = 404;
+  error.status = http2.constants.HTTP_STATUS_NOT_FOUND;
   error.message = 'Endpoint not found';
 
   res.status(http2.constants.HTTP_STATUS_NOT_FOUND).json({ message: 'Неверный путь' });
 });
 
-app.use((err, req, res) => {
-  res.status(err.status || 500).json({ error: err.message });
-});
+app.use(errorHandler);

@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const HTTP_STATUS_CODE = require('../constans/constants');
 
@@ -30,14 +32,23 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.status(HTTP_STATUS_CODE.CREATED).send(user);
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      User.create({
+        name, about, avatar, email, password: hash,
+      })
+        .then((user) => {
+          res.status(HTTP_STATUS_CODE.CREATED).send(user);
+        })
+        .catch((err) => {
+          res.status(HTTP_STATUS_CODE.BAD_REQUEST).send(err);
+        });
     })
-    .catch((err) => {
-      res.status(HTTP_STATUS_CODE.BAD_REQUEST).send(err);
+    .catch(() => {
+      res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -71,11 +82,50 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({ message: 'Неправильные почта или пароль' });
+        return;
+      }
+
+      bcrypt.compare(password, user.password)
+        .then((isPasswordCorrect) => {
+          if (!isPasswordCorrect) {
+            res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({ message: 'Неправильные почта или пароль' });
+            return;
+          }
+
+          const token = jwt.sign({ _id: user._id }, 'your-secret-key', { expiresIn: '7d' });
+
+          res.cookie('jwt', token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+          });
+
+          res.status(HTTP_STATUS_CODE.OK).send({ message: 'Вход выполнен успешно' });
+        })
+        .catch(() => {
+          res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+        });
+    })
+    .catch(() => {
+      res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+    });
+};
+
+const getUserInfo = (req, res) => {
+  res.status(HTTP_STATUS_CODE.OK).send({ data: req.user });
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
   createUser,
   updateProfile,
   updateAvatar,
-  User,
+  login,
+  getUserInfo,
 };
