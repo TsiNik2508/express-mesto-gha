@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const HTTP_STATUS_CODE = require('../constans/constants');
+const jwt = require('jsonwebtoken');
 
 const getAllUsers = (req, res) => {
   User.find({})
@@ -24,7 +24,7 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: err.message });
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: 'Некорректный формат ID пользователя' });
         return;
       }
       res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
@@ -44,7 +44,7 @@ const createUser = (req, res) => {
           res.status(HTTP_STATUS_CODE.CREATED).send(user);
         })
         .catch((err) => {
-          res.status(HTTP_STATUS_CODE.BAD_REQUEST).send(err);
+          res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: 'Ошибка при создании пользователя', error: err.message });
         });
     })
     .catch(() => {
@@ -60,10 +60,10 @@ const updateProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: err.message });
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: 'Ошибка валидации данных', error: err.message });
         return;
       }
-      res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'Ошибка при обновлении данных', error: err.message });
     });
 };
 
@@ -75,10 +75,10 @@ const updateAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: err.message });
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({ message: 'Ошибка валидации данных', error: err.message });
         return;
       }
-      res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'На сервере произошла ошибка' });
+      res.status(HTTP_STATUS_CODE.SERVER_ERROR).send({ message: 'Ошибка при обновлении аватара', error: err.message });
     });
 };
 
@@ -94,11 +94,11 @@ const login = (req, res) => {
       bcrypt.compare(password, user.password)
         .then((isPasswordCorrect) => {
           if (!isPasswordCorrect) {
-            res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({ message: 'Неправильные почта или пароль' });
+            res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({ message: 'Неправильный пароль' });
             return;
           }
 
-          const token = jwt.sign({ _id: user._id }, 'your-secret-key', { expiresIn: '7d' });
+          const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
           res.cookie('jwt', token, {
             maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -117,6 +117,10 @@ const login = (req, res) => {
 };
 
 const getUserInfo = (req, res) => {
+  if (!req.user) {
+    res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({ message: 'Пользователь не авторизован' });
+    return;
+  }
   res.status(HTTP_STATUS_CODE.OK).send({ data: req.user });
 };
 

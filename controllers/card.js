@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const HTTP_STATUS_CODE = require('../constants/constants');
+const HTTP_STATUS_CODE = require('../constans/constants');
 
 const getAllCards = (req, res) => {
   Card.find({})

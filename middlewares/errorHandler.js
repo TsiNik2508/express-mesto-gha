@@ -1,4 +1,4 @@
-const HTTP_STATUS_CODE = require('../constants/constants');
+const HTTP_STATUS_CODE = require('../constans/constants');
 
 const errorHandler = (err, req, res, next) => {
   let statusCode = HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR;

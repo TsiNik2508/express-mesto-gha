@@ -5,7 +5,7 @@ const {
   deleteCard,
   likeCard,
   dislikeCard,
-} = require('../controllers/cards');
+} = require('../controllers/card');
 const {
   validateCard,
   errors: validateErrors,
