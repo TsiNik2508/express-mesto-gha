@@ -1,7 +1,7 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const HTTP_STATUS_CODE = require('../constans/constants');
-const jwt = require('jsonwebtoken');
 
 const getAllUsers = (req, res) => {
   User.find({})

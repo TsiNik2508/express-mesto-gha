@@ -111,6 +111,7 @@ const deleteCard = (req, res) => {
           res.status(HTTP_STATUS_CODE.OK).send({ data: card });
         })
         .catch((err) => {
+          console.error(err);
           res
             .status(HTTP_STATUS_CODE.SERVER_ERROR)
             .send({ message: 'На сервере произошла ошибка' });

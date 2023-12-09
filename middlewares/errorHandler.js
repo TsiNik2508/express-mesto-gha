@@ -1,6 +1,6 @@
 const HTTP_STATUS_CODE = require('../constans/constants');
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   let statusCode = HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR;
   let message = 'На сервере произошла ошибка';
 

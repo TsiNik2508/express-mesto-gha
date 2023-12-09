@@ -1,22 +1,32 @@
 const jwt = require('jsonwebtoken');
 
-const { JWT_SECRET } = process.env;
-
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization;
-
-  if (!token) {
-    return res.status(401).json({ message: 'Необходима авторизация' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, payload) => {
-    if (err) {
-      return res.status(401).json({ message: 'Необходима авторизация' });
-    }
-
-    req.user = payload;
-    next();
-  });
+const createUnauthorizedError = (message) => {
+  const error = new Error(message);
+  error.statusCode = 401;
+  return error;
 };
 
-module.exports = authMiddleware;
+const extractBearerToken = (header) => header.replace('Bearer ', '');
+
+module.exports = (req, res, next) => {
+  const { authorization } = req.headers;
+
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    next(createUnauthorizedError('Необходима авторизация'));
+    return;
+  }
+
+  const token = extractBearerToken(authorization);
+  let payload;
+
+  try {
+    payload = jwt.verify(token, 'your-secret-key');
+  } catch (err) {
+    next(createUnauthorizedError('Необходима авторизация'));
+    return;
+  }
+
+  req.user = payload;
+
+  next();
+};

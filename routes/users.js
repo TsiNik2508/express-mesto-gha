@@ -16,5 +16,6 @@ router.post('/', validateSignup, createUser);
 router.patch('/me', validateUpdateProfile, updateProfile);
 router.patch('/me/avatar', validateUpdateAvatar, updateAvatar);
 router.get('/me', getUserInfo);
+router.post('/login', login);
 
 module.exports = router;
