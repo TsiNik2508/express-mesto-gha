@@ -1,49 +1,52 @@
-require('dotenv').config();
-
 const express = require('express');
 const mongoose = require('mongoose');
-const http2 = require('http2');
-const authMiddleware = require('./middlewares/auth');
-const errorHandler = require('./middlewares/errorHandler');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
+const auth = require('./middlewares/auth');
+const router = require('./routes/routes');
 
 const app = express();
-const port = process.env.PORT || 3000;
 
-const dbURI = process.env.DB_URL || 'mongodb://localhost:27017/mestodb';
+app.use(bodyParser.json());
+const { validationCreateUser, validationLogin } = require('./middlewares/validate');
 
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Соединение с MongoDB установлено');
-  })
-  .catch((error) => {
-    console.error('Ошибка соединения с MongoDB:', error);
-    process.exit(1);
+const { PORT = 3000, MONGO_URL = 'mongodb://localhost:27017/mestodb' } = process.env;
+const { createUsers, login } = require('./controllers/auth');
+
+app.post('/signin', validationLogin, login);
+app.post('/signup', validationCreateUser, createUsers);
+app.use(auth);
+app.use(router);
+app.use(helmet());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+async function connect() {
+  try {
+    await mongoose.set('strictQuery', false);
+    await mongoose.connect('mongodb://localhost:27017/mestodb');
+    console.log(`App connected ${MONGO_URL}`);
+    await app.listen(PORT);
+    console.log(`App listening on port ${PORT}`);
+  } catch (err) {
+    console.log(err);
+  }
+}
+app.use(errors());
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode).send({
+    message: statusCode === 500
+      ? 'На сервере произошла ошибка'
+      : message,
   });
-
-app.use(express.json());
-app.use('/users', authMiddleware);
-app.use('/users', require('./routes/users'));
-
-app.use('/cards', authMiddleware);
-app.use('/cards', require('./routes/cards'));
-
-const db = mongoose.connection;
-
-db.on('error', console.error.bind(console, 'Ошибка соединения с MongoDB:'));
-db.once('open', () => {
-  console.log('Соединение с MongoDB установлено');
+  next();
 });
 
-app.listen(port, () => {
-  console.log(`Сервер запущен на http://localhost:${port}`);
-});
-
-app.use((req, res) => {
-  const error = new Error('Not Found');
-  error.status = http2.constants.HTTP_STATUS_NOT_FOUND;
-  error.message = 'Endpoint not found';
-
-  res.status(http2.constants.HTTP_STATUS_NOT_FOUND).json({ message: 'Неверный путь' });
-});
-
-app.use(errorHandler);
+connect();
