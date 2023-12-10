@@ -27,7 +27,7 @@ module.exports.createUser = (req, res, next) => {
         if (err.name === 'ValidationError') {
           return next(new BadRequest('На сервере произошла ошибка'));
         }
-        next(err);
+        return next(err);
       });
   })
     .catch(next);
