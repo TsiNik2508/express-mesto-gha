@@ -1,10 +1,9 @@
 const { celebrate, Joi } = require('celebrate');
-const isUrl = require('validator');
+const { isURL } = require('validator');
 const BadRequest = require('../error/BadRequest');
 
 const validateUrl = (url) => {
-  const validate = isUrl(url);
-  if (validate) {
+  if (isURL(url)) {
     return url;
   }
   throw new BadRequest('Некорректный адрес URL');
