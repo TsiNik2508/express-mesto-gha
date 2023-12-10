@@ -9,7 +9,7 @@ const {
 } = require('../controllers/users');
 
 const {
-  validateUpdateUser,
+  validateUpdateProfile,
   validateAvatarUpdate,
   validateUserId,
 } = require('../middlewares/validate');
@@ -17,7 +17,7 @@ const {
 userRoute.get('/', getAllUsers);
 userRoute.get('/me', getCurrentUser);
 userRoute.get('/:userId', validateUserId, getUserById);
-userRoute.patch('/me', validateUpdateUser, updateProfile);
+userRoute.patch('/me', validateUpdateProfile, updateProfile);
 userRoute.patch('/me/avatar', validateAvatarUpdate, updateAvatar);
 
 module.exports = userRoute;
