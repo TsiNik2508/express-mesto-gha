@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     default: 'https://cdn.forbes.ru/forbes-static/c/908x511/new/2022/05/rick-and-morty-siemki-3-62851a0fad390.webp',
     validate: {
       validator: (url) => validator.isURL(url),
-      message: 'Некорректны адрес URL',
+      message: 'Некорректный адрес URL',
     },
   },
   email: {
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (email) => validator.isEmail(email),
-      message: 'Некорректы адрес почты',
+      message: 'Некорректный адрес почты',
     },
   },
   password: {
@@ -44,12 +44,12 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Unauthorized('Неправильне почта или пароль'));
+        return Promise.reject(new Unauthorized('Неправильный адрес почты или пароль'));
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Unauthorized('Неправильная почта или пароль'));
+            return Promise.reject(new Unauthorized('Неправильный адрес почты или пароль'));
           }
           return user;
         });
