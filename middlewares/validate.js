@@ -34,7 +34,7 @@ module.exports.validateUpdateProfile = celebrate({
   }),
 });
 
-module.exports.validateUpdateAvatar = celebrate({
+module.exports.validateAvatarUpdate = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().custom(validateUrl),
   }),

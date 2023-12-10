@@ -1,11 +1,11 @@
 const express = require('express');
 const router = require('express').Router();
-const usersRouter = require('./users');
-const cardsRouter = require('./cards');
+const userRoute = require('./users');
+const cardRoute = require('./cards');
 const Status = require('../error/Status');
 
-router.use('/users', usersRouter);
-router.use('/cards', cardsRouter);
+router.use('/users', userRoute);
+router.use('/cards', cardRoute);
 router.use((req, res, next) => {
   next(new Status('Такая страница не существует'));
 });
