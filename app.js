@@ -5,7 +5,7 @@ const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
-const router = require('./routes/routes');
+const router = require('./routes/route');
 
 const app = express();
 
@@ -23,8 +23,6 @@ app.use(helmet());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
 });
 app.use(limiter);
 async function connect() {
@@ -35,7 +33,7 @@ async function connect() {
     await app.listen(PORT);
     console.log(`App listening on port ${PORT}`);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 app.use(errors());

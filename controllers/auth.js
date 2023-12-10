@@ -1,36 +1,28 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const userSchema = require('../models/user');
 const BadRequest = require('../error/BadRequest');
 const Conflict = require('../error/Conflict');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
-module.exports.createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  bcrypt.hash(password, 10).then((hash) => {
-    userSchema
-      .create({
-        name, about, avatar, email, password: hash,
-      })
-      .then(() => res.status(201).send(
-        {
-          data: {
-            name, about, avatar, email,
-          },
-        },
-      ))
-      .catch((err) => {
-        if (err.code === 11000) {
-          return next(new Conflict('Ошибка при создании пользователя'));
-        }
-        if (err.name === 'ValidationError') {
-          return next(new BadRequest('На сервере произошла ошибка'));
-        }
-        next(err);
-      });
-  })
-    .catch(next);
+module.exports.createUser = async (req, res, next) => {
+  try {
+    const { name, about, avatar, email, password } = req.body;
+    const hash = await bcrypt.hash(password, 10);
+    await userSchema.create({
+      name, about, avatar, email, password: hash,
+    });
+    res.status(201).send({
+      data: { name, about, avatar, email },
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return next(new Conflict('Ошибка при создании пользователя'));
+    }
+    if (err.name === 'ValidationError') {
+      return next(new BadRequest('На сервере произошла ошибка'));
+    }
+    next(err);
+  }
 };
 
 module.exports.login = (req, res, next) => {
