@@ -9,17 +9,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Исследователь',
   },
   avatar: {
     type: String,
-    default: 'https://cdn.forbes.ru/forbes-static/c/908x511/new/2022/05/rick-and-morty-siemki-3-62851a0fad390.webp',
     validate: {
       validator: validateUrl,
       message: 'Некорректный адрес URL',
