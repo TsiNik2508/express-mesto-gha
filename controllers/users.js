@@ -60,9 +60,11 @@ module.exports.updateAvatar = (req, res, next) => {
     )
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new BadRequest('Ошибка при обновлении аватара'));
       } else if (err.code === 11000) {
+        next(err);
+      } else {
         next(err);
       }
     });
