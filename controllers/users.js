@@ -41,7 +41,13 @@ module.exports.updateProfile = (req, res, next) => {
       }
       res.status(200).send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('Ошибка при обновлении данных'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -53,7 +59,11 @@ module.exports.updateAvatar = (req, res, next) => {
       { new: true, runValidators: true },
     )
     .then((user) => res.status(200).send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(new BadRequest('Ошибка при обновлении аватара'));
+      } else next(err);
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
@@ -64,5 +74,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       }
       res.status(200).send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
