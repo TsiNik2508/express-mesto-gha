@@ -1,6 +1,5 @@
 const cardSchema = require('../models/card');
 const Status = require('../error/Status');
-const BadRequest = require('../error/BadRequest');
 const Forbidden = require('../error/Forbidden');
 
 module.exports.getAllCards = (req, res, next) => {
@@ -16,13 +15,7 @@ module.exports.createCards = (req, res, next) => {
   cardSchema
     .create({ name, link, owner })
     .then((card) => res.status(201).send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequest('На сервере произошла ошибка'));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -38,12 +31,7 @@ module.exports.likeCard = (req, res, next) => {
       }
       res.send({ data: card });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequest('На сервере произошла ошибка'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -59,12 +47,7 @@ module.exports.dislikeCard = (req, res, next) => {
       }
       res.send({ data: card });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequest('На сервере произошла ошибка'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
