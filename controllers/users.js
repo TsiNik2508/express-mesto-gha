@@ -42,9 +42,11 @@ module.exports.updateProfile = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(BadRequest('Ошибка при обновлении данных'));
-      } else next(err);
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -74,9 +76,9 @@ module.exports.getCurrentUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(BadRequest('Переданы некорректные данные'));
-      } else if (err.message === 'NotFound') {
-        next(new Status('Пользователь не найден'));
-      } else next(err);
+        next(new BadRequest('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
     });
 };
