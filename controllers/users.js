@@ -62,7 +62,9 @@ module.exports.updateAvatar = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequest('Ошибка при обновлении аватара'));
-      } else next(err);
+      } else if (err.code === 11000) {
+        next(err);
+      }
     });
 };
 
