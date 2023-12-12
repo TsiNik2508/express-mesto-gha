@@ -58,11 +58,18 @@ module.exports.updateAvatar = (req, res, next) => {
       { avatar },
       { new: true, runValidators: true },
     )
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        throw new Status('Запрашиваемый пользователь не найден');
+      }
+      res.status(200).send(user);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest('Ошибка при обновлении аватара'));
-      } else next(err);
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -75,10 +82,6 @@ module.exports.getCurrentUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequest('Переданы некорректные данные'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
