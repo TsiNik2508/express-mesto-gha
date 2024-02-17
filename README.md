@@ -1,6 +1,5 @@
 # Ru
 
-[![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # Проект Mesto бэкенд
 
 ## Backend часть сервиса, с помощью которого пользователь может делиться фото с другими пользователями, регистрироваться и авторизироваться.
